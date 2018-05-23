@@ -35,6 +35,7 @@ namespace MyRestful.Api
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
             });
         }
 

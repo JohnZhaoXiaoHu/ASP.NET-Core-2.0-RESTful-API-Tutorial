@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
@@ -64,6 +65,18 @@ namespace MyRestful.Api.Controllers
             var countryResource = Mapper.Map<CountryResource>(countryModel);
 
             return CreatedAtRoute("GetCountry", new { id = countryModel.Id }, countryResource);
+        }
+
+        [HttpPost("{id}")]
+        public async Task<IActionResult> BlockCreatingCountry(int id)
+        {
+            var country = await _countryRepository.GetCountryByIdAsync(id);
+            if (country == null)
+            {
+                return NotFound();
+            }
+
+            return StatusCode(StatusCodes.Status409Conflict);
         }
     }
 }

@@ -10,5 +10,6 @@ namespace MyRestful.Core.Interfaces
         void AddCountry(Country country);
         Task<Country> GetCountryByIdAsync(int id);
         Task<bool> CountryExistAsync(int countryId);
+        Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<int> ids);
     }
 }

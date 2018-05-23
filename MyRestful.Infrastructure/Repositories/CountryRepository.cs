@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyRestful.Core.DomainModels;
@@ -18,6 +19,11 @@ namespace MyRestful.Infrastructure.Repositories
         public async Task<IEnumerable<Country>> GetCountriesAsync()
         {
             return await _myContext.Countries.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<int> ids)
+        {
+            return await _myContext.Countries.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
 
         public async Task<Country> GetCountryByIdAsync(int id)
