@@ -11,5 +11,6 @@ namespace MyRestful.Core.Interfaces
         Task<Country> GetCountryByIdAsync(int id);
         Task<bool> CountryExistAsync(int countryId);
         Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<int> ids);
+        void DeleteCountry(Country country);
     }
 }

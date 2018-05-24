@@ -40,5 +40,11 @@ namespace MyRestful.Infrastructure.Repositories
         {
             return await _myContext.Countries.AnyAsync(x => x.Id == countryId);
         }
+
+        public void DeleteCountry(Country country)
+        {
+            _myContext.Countries.Remove(country);
+        }
+
     }
 }

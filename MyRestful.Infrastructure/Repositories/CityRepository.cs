@@ -26,10 +26,20 @@ namespace MyRestful.Infrastructure.Repositories
             return await _myContext.Cities.SingleOrDefaultAsync(x => x.CountryId == countryId && x.Id == cityId);
         }
 
-        public void AddCity(int countryId, City city)
+        public void AddCityForCountry(int countryId, City city)
         {
             city.CountryId = countryId;
             _myContext.Cities.Add(city);
+        }
+
+        public void DeleteCity(City city)
+        {
+            _myContext.Cities.Remove(city);
+        }
+
+        public void UpdateCityForCountry(City city)
+        {
+            _myContext.Update(city);
         }
 
     }

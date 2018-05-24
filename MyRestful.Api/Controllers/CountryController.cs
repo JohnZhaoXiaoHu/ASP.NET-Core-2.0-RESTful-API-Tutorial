@@ -78,5 +78,24 @@ namespace MyRestful.Api.Controllers
 
             return StatusCode(StatusCodes.Status409Conflict);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCountry(int id)
+        {
+            var country = await _countryRepository.GetCountryByIdAsync(id);
+            if (country == null)
+            {
+                return NotFound();
+            }
+
+            _countryRepository.DeleteCountry(country);
+
+            if (!await _unitOfWork.SaveAsync())
+            {
+                return StatusCode(500, $"Deleting country {id} failed when saving.");
+            }
+
+            return NoContent();
+        }
     }
 }

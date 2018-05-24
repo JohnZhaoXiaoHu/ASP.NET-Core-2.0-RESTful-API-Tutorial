@@ -10,6 +10,8 @@ namespace MyRestful.Core.Interfaces
     {
         Task<List<City>> GetCitiesForCountryAsync(int countryId);
         Task<City> GetCityForCountryAsync(int countryId, int cityId);
-        void AddCity(int countryId, City city);
+        void AddCityForCountry(int countryId, City city);
+        void DeleteCity(City city);
+        void UpdateCityForCountry(City city);
     }
 }

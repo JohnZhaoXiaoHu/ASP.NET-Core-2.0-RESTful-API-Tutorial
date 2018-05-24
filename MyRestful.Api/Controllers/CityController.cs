@@ -16,9 +16,9 @@ namespace MyRestful.Api.Controllers
         private readonly ICityRepository _cityRepository;
         private readonly IMapper _mapper;
 
-        public CityController(IUnitOfWork unitOfWork, 
-            ICountryRepository countryRepository, 
-            ICityRepository cityRepository, 
+        public CityController(IUnitOfWork unitOfWork,
+            ICountryRepository countryRepository,
+            ICityRepository cityRepository,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
@@ -71,7 +71,7 @@ namespace MyRestful.Api.Controllers
             }
 
             var cityModel = _mapper.Map<City>(city);
-            _cityRepository.AddCity(countryId, cityModel);
+            _cityRepository.AddCityForCountry(countryId, cityModel);
             if (!await _unitOfWork.SaveAsync())
             {
                 return StatusCode(500, "Error occurred when adding");
@@ -80,6 +80,63 @@ namespace MyRestful.Api.Controllers
             var cityResource = Mapper.Map<CityResource>(cityModel);
 
             return CreatedAtRoute("GetCity", new { countryId, cityId = cityModel.Id }, cityResource);
+        }
+
+        [HttpDelete("{cityId}")]
+        public async Task<IActionResult> DeleteCityForCountry(int countryId, int cityId)
+        {
+            if (!await _countryRepository.CountryExistAsync(countryId))
+            {
+                return NotFound();
+            }
+
+            var city = await _cityRepository.GetCityForCountryAsync(countryId, cityId);
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            _cityRepository.DeleteCity(city);
+
+            if (!await _unitOfWork.SaveAsync())
+            {
+                return StatusCode(500, $"Deleting city {cityId} for country {countryId} failed when saving.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpPut("{cityId}")]
+        public async Task<IActionResult> UpdateCityForCountry(int countryId, int cityId, 
+            [FromBody] CityUpdateResource cityUpdate)
+        {
+            if (cityUpdate == null)
+            {
+                return BadRequest();
+            }
+
+            if (!await _countryRepository.CountryExistAsync(countryId))
+            {
+                return NotFound();
+            }
+
+            var city = await _cityRepository.GetCityForCountryAsync(countryId, cityId);
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            // 把cityUpdate的属性值都映射给city
+            _mapper.Map(cityUpdate, city);
+
+            _cityRepository.UpdateCityForCountry(city);
+
+            if (!await _unitOfWork.SaveAsync())
+            {
+                return StatusCode(500, $"Updating city {cityId} for country {countryId} failed when saving.");
+            }
+
+            return NoContent(); 
         }
     }
 }
