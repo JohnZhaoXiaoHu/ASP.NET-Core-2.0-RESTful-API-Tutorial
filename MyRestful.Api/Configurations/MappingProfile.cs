@@ -16,6 +16,7 @@ namespace MyRestful.Api.Configurations
             CreateMap<CityResource, City>();
             CreateMap<CityAddResource, City>();
             CreateMap<CityUpdateResource, City>();
+            CreateMap<City, CityUpdateResource>();
         }
     }
 }

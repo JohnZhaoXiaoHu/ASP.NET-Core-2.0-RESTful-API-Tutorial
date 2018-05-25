@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
@@ -123,6 +124,17 @@ namespace MyRestful.Api.Controllers
             var city = await _cityRepository.GetCityForCountryAsync(countryId, cityId);
             if (city == null)
             {
+                //var cityToAdd = _mapper.Map<City>(cityUpdate);
+                //cityToAdd.Id = cityId; // 如果Id不是自增的话
+                //_cityRepository.AddCityForCountry(countryId, cityToAdd);
+
+                //if (!await _unitOfWork.SaveAsync())
+                //{
+                //    return StatusCode(500, $"Upserting city {cityId} for country {countryId} failed when inserting");
+                //}
+
+                //var cityResource = Mapper.Map<CityResource>(cityToAdd);
+                //return CreatedAtRoute("GetCity", new { countryId, cityId }, cityResource);
                 return NotFound();
             }
 
@@ -137,6 +149,57 @@ namespace MyRestful.Api.Controllers
             }
 
             return NoContent(); 
+        }
+
+        [HttpPatch("{cityId}")]
+        public async Task<IActionResult> PartiallyUpdateCityForCountry(int countryId, int cityId, 
+            [FromBody] JsonPatchDocument<CityUpdateResource> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return BadRequest();
+            }
+
+            if (!await _countryRepository.CountryExistAsync(countryId))
+            {
+                return NotFound();
+            }
+
+            var city = await _cityRepository.GetCityForCountryAsync(countryId, cityId);
+            if (city == null)
+            {
+                //var cityUpdate = new CityUpdateResource();
+                //patchDoc.ApplyTo(cityUpdate);
+                //var cityToAdd = _mapper.Map<City>(cityUpdate);
+                //cityToAdd.Id = cityId; // 只适用于Id不是自增的情况
+
+                //_cityRepository.AddCityForCountry(countryId, cityToAdd);
+
+                //if (!await _unitOfWork.SaveAsync())
+                //{
+                //    return StatusCode(500, $"P city {cityId} for country {countryId} failed when inserting");
+                //}
+                //var cityResource = Mapper.Map<CityResource>(cityToAdd);
+                //return CreatedAtRoute("GetCity", new { countryId, cityId }, cityResource);
+
+                return NotFound();
+            }
+
+            var cityToPatch = _mapper.Map<CityUpdateResource>(city);
+
+            patchDoc.ApplyTo(cityToPatch);
+
+            // 需要验证
+
+            _mapper.Map(cityToPatch, city);
+            _cityRepository.UpdateCityForCountry(city);
+
+            if (!await _unitOfWork.SaveAsync())
+            {
+                return StatusCode(500, $"Patching city {cityId} for country {countryId} failed when saving.");
+            }
+
+            return NoContent();
         }
     }
 }

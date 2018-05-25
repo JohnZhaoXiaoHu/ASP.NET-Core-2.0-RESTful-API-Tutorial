@@ -28,8 +28,8 @@ namespace MyRestful.Infrastructure
                                 Abbreviation = "中国",
                                 Cities = new List<City>
                                 {
-                                    new City{ Name = "北京" },
-                                    new City{ Name = "上海" },
+                                    new City{ Name = "北京", Description = "首都"},
+                                    new City{ Name = "上海", Description = "魔都" },
                                     new City{ Name = "深圳" },
                                     new City{ Name = "杭州" },
                                     new City{ Name = "天津" }
