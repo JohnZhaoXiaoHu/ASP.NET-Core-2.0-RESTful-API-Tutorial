@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyRestful.Core.DomainModels;
 
@@ -16,7 +17,7 @@ namespace MyRestful.Infrastructure
             try
             {
                 // TODO: Only run this if using a real database
-                // context.Database.Migrate();
+                // myContext.Database.Migrate();
 
                 if (!myContext.Countries.Any())
                 {

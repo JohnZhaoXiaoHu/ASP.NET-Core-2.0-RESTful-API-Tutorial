@@ -1,8 +1,6 @@
 ﻿namespace MyRestful.Api.Resources
 {
-    public class CityUpdateResource
+    public class CityUpdateResource : CityAddOrUpdateResource
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
     }
 }

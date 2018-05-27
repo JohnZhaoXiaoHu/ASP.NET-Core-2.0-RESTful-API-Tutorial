@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MyRestful.Api.Resources;
+using MyRestful.Api.Validators;
 using MyRestful.Core.Interfaces;
 using MyRestful.Infrastructure;
 using MyRestful.Infrastructure.Repositories;
@@ -36,7 +40,14 @@ namespace MyRestful.Api
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
                 options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
-            });
+            }).AddFluentValidation();
+
+            services.AddTransient<IValidator<CityAddResource>, CityAddOrUpdateResourceValidator<CityAddResource>>();
+            services.AddTransient<IValidator<CityUpdateResource>, CityUpdateResourceValidator>();
+            services.AddTransient<IValidator<CountryAddResource>, CountryAddResourceValidator>();
+
+            // services.AddMvc()
+            //     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

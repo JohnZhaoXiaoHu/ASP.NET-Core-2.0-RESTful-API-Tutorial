@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using MyRestful.Api.Helpers;
 using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
@@ -66,6 +67,11 @@ namespace MyRestful.Api.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+
             if (!await _countryRepository.CountryExistAsync(countryId))
             {
                 return NotFound();
@@ -114,6 +120,11 @@ namespace MyRestful.Api.Controllers
             if (cityUpdate == null)
             {
                 return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             if (!await _countryRepository.CountryExistAsync(countryId))
