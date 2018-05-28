@@ -198,9 +198,14 @@ namespace MyRestful.Api.Controllers
 
             var cityToPatch = _mapper.Map<CityUpdateResource>(city);
 
-            patchDoc.ApplyTo(cityToPatch);
+            patchDoc.ApplyTo(cityToPatch, ModelState);
 
-            // 需要验证
+            TryValidateModel(cityToPatch);
+
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
 
             _mapper.Map(cityToPatch, city);
             _cityRepository.UpdateCityForCountry(city);
