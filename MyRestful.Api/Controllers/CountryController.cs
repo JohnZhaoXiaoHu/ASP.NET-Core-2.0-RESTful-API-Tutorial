@@ -59,7 +59,7 @@ namespace MyRestful.Api.Controllers
             _countryRepository.AddCountry(countryModel);
             if (!await _unitOfWork.SaveAsync())
             {
-                return StatusCode(500, "Error occurred when adding");
+                throw new Exception("Error occurred when adding");
             }
 
             var countryResource = Mapper.Map<CountryResource>(countryModel);
@@ -92,7 +92,7 @@ namespace MyRestful.Api.Controllers
 
             if (!await _unitOfWork.SaveAsync())
             {
-                return StatusCode(500, $"Deleting country {id} failed when saving.");
+                throw new Exception($"Deleting country {id} failed when saving.");
             }
 
             return NoContent();

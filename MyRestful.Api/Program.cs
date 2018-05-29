@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MyRestful.Infrastructure;
+using Serilog;
 
 namespace MyRestful.Api
 {
@@ -36,6 +37,7 @@ namespace MyRestful.Api
                 .UseIISIntegration()
                 .UseUrls("http://localhost:5000")
                 .UseStartup<Startup>()
+                .UseSerilog()
                 .Build();
     }
 }

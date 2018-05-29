@@ -45,7 +45,7 @@ namespace MyRestful.Api.Controllers
 
             if (!await _unitOfWork.SaveAsync())
             {
-                return StatusCode(500, "Error occurred when adding");
+                throw new Exception("Error occurred when adding");
             }
 
             var countryResources = _mapper.Map<IEnumerable<CountryResource>>(countriesModel);

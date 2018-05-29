@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MyRestful.Api.Helpers;
 using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
@@ -17,16 +19,19 @@ namespace MyRestful.Api.Controllers
         private readonly ICountryRepository _countryRepository;
         private readonly ICityRepository _cityRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<CityController> _logger;
 
         public CityController(IUnitOfWork unitOfWork,
             ICountryRepository countryRepository,
             ICityRepository cityRepository,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger<CityController> logger)
         {
             _unitOfWork = unitOfWork;
             _countryRepository = countryRepository;
             _cityRepository = cityRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -47,6 +52,7 @@ namespace MyRestful.Api.Controllers
         {
             if (!await _countryRepository.CountryExistAsync(countryId))
             {
+                _logger.LogInformation("Not Found");
                 return NotFound();
             }
 
@@ -81,7 +87,7 @@ namespace MyRestful.Api.Controllers
             _cityRepository.AddCityForCountry(countryId, cityModel);
             if (!await _unitOfWork.SaveAsync())
             {
-                return StatusCode(500, "Error occurred when adding");
+                throw new Exception("Error occurred when adding");
             }
 
             var cityResource = Mapper.Map<CityResource>(cityModel);
@@ -107,7 +113,7 @@ namespace MyRestful.Api.Controllers
 
             if (!await _unitOfWork.SaveAsync())
             {
-                return StatusCode(500, $"Deleting city {cityId} for country {countryId} failed when saving.");
+                throw new Exception($"Deleting city {cityId} for country {countryId} failed when saving.");
             }
 
             return NoContent();
@@ -156,7 +162,7 @@ namespace MyRestful.Api.Controllers
 
             if (!await _unitOfWork.SaveAsync())
             {
-                return StatusCode(500, $"Updating city {cityId} for country {countryId} failed when saving.");
+                throw new Exception($"Updating city {cityId} for country {countryId} failed when saving.");
             }
 
             return NoContent(); 
@@ -212,7 +218,7 @@ namespace MyRestful.Api.Controllers
 
             if (!await _unitOfWork.SaveAsync())
             {
-                return StatusCode(500, $"Patching city {cityId} for country {countryId} failed when saving.");
+                throw new Exception($"Patching city {cityId} for country {countryId} failed when saving.");
             }
 
             return NoContent();
