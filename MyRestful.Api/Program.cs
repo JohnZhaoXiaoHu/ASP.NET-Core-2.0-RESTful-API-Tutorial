@@ -13,7 +13,7 @@ namespace MyRestful.Api
         public static void Main(string[] args)
         {
             Console.Title = "My Restful API";
-            var host = BuildWebHost(args);
+            var host = CreateWebHostBuilder(args).Build();
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -32,12 +32,11 @@ namespace MyRestful.Api
             host.Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseIISIntegration()
                 .UseUrls("http://localhost:5000")
                 .UseStartup<Startup>()
-                .UseSerilog()
-                .Build();
+                .UseSerilog();
     }
 }

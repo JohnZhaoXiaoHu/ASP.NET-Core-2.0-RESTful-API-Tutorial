@@ -84,6 +84,9 @@ namespace MyRestful.Api
                 });
             });
 
+            app.UseHsts();
+            app.UseHttpsRedirection();
+
             app.UseMvc();
         }
     }
