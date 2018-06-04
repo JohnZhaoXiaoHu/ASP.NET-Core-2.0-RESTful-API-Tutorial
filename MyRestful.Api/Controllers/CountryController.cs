@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -12,14 +13,14 @@ namespace MyRestful.Api.Controllers
 {
     // [Route("api/[controller]")]
     [Route("api/countries")]
-    public class CountryController: Controller
+    public class CountryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
 
         public CountryController(
-            IUnitOfWork unitOfWork, 
+            IUnitOfWork unitOfWork,
             ICountryRepository countryRepository, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
@@ -36,9 +37,9 @@ namespace MyRestful.Api.Controllers
         }
 
         [HttpGet("{id}", Name = "GetCountry")]
-        public async Task<IActionResult> GetCountry(int id)
+        public async Task<IActionResult> GetCountry(int id, bool includeCities = false)
         {
-            var country = await _countryRepository.GetCountryByIdAsync(id);
+            var country = await _countryRepository.GetCountryByIdAsync(id, includeCities);
             if (country == null)
             {
                 return NotFound();
@@ -97,5 +98,31 @@ namespace MyRestful.Api.Controllers
 
             return NoContent();
         }
+
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCountry(int id, [FromBody] CountryUpdateResource countryUpdate)
+        {
+            if (countryUpdate == null)
+            {
+                return BadRequest();
+            }
+            if (!ModelState.IsValid)
+            {
+                return new UnprocessableEntityObjectResult(ModelState);
+            }
+            var country = await _countryRepository.GetCountryByIdAsync(id, includeCities: true);
+            if (country == null)
+            {
+                return NotFound();
+            }
+            _mapper.Map(countryUpdate, country);
+            if (!await _unitOfWork.SaveAsync())
+            {
+                throw new Exception($"Updating country {id} failed when saving.");
+            }
+            return NoContent();
+        }
+
     }
 }

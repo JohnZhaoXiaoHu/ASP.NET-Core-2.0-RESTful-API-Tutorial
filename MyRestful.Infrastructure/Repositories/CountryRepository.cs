@@ -26,14 +26,23 @@ namespace MyRestful.Infrastructure.Repositories
             return await _myContext.Countries.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
 
-        public async Task<Country> GetCountryByIdAsync(int id)
+        public async Task<Country> GetCountryByIdAsync(int id, bool includeCities = false)
         {
-            return await _myContext.Countries.FindAsync(id);
+            if (!includeCities)
+            {
+                return await _myContext.Countries.FindAsync(id);
+            }
+            return await _myContext.Countries.Include(x => x.Cities).SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public void AddCountry(Country country)
         {
             _myContext.Countries.Add(country);
+        }
+
+        public void UpdateCountry(Country country)
+        {
+            _myContext.Countries.Update(country);
         }
 
         public async Task<bool> CountryExistAsync(int countryId)

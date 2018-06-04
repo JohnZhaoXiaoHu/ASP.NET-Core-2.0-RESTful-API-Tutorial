@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using System.Linq;
+using AutoMapper;
 using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
 
@@ -11,6 +13,32 @@ namespace MyRestful.Api.Configurations
             CreateMap<Country, CountryResource>();
             CreateMap<CountryResource, Country>();
             CreateMap<CountryAddResource, Country>();
+            CreateMap<CountryUpdateResource, Country>()
+                .ForMember(c => c.Cities, opt => opt.Ignore())
+                .AfterMap((countryUpdateResource, country) =>
+                {
+                    // Remove
+                    var countryUpdateCityIds = countryUpdateResource.Cities.Select(x => x.Id).ToList();
+                    var removedCities = country.Cities.Where(c => !countryUpdateCityIds.Contains(c.Id)).ToList();
+                    foreach (var city in removedCities)
+                    {
+                        country.Cities.Remove(city);
+                    }
+                    // Add
+                    var addedCityResources = countryUpdateResource.Cities.Where(x => x.Id == 0);
+                    var addedCities = Mapper.Map<IEnumerable<City>>(addedCityResources);
+                    foreach (var city in addedCities)
+                    {
+                        country.Cities.Add(city);
+                    }
+                    // Update or Unchanged
+                    var maybeUpdateCities = country.Cities.Where(x => x.Id != 0).ToList();
+                    foreach (var city in maybeUpdateCities)
+                    {
+                        var cityResource = countryUpdateResource.Cities.Single(x => x.Id == city.Id);
+                        Mapper.Map(cityResource, city);
+                    }
+                });
 
             CreateMap<City, CityResource>();
             CreateMap<CityResource, City>();

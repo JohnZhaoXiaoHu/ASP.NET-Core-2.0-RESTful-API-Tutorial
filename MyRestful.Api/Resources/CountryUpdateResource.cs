@@ -2,16 +2,17 @@
 
 namespace MyRestful.Api.Resources
 {
-    public class CountryResource
+    public class CountryUpdateResource
     {
-        public CountryResource()
+        public CountryUpdateResource()
         {
             Cities = new List<CityResource>();
         }
 
-        public int Id { get; set; }
         public string EnglishName { get; set; }
+
         public string ChineseName { get; set; }
+
         public string Abbreviation { get; set; }
 
         public List<CityResource> Cities { get; set; }
