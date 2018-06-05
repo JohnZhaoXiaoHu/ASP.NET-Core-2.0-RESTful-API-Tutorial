@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,17 +52,25 @@ namespace MyRestful.Api
             services.AddDbContext<MyContext>(options =>
             {
                 options.UseInMemoryDatabase("MyDatabase");
+                options.UseLoggerFactory(_loggerFactory);
             });
             services.AddMvc(options =>
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
-                options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
             }).AddFluentValidation();
 
             services.AddTransient<IValidator<CityAddResource>, CityAddOrUpdateResourceValidator<CityAddResource>>();
             services.AddTransient<IValidator<CityUpdateResource>, CityUpdateResourceValidator>();
             services.AddTransient<IValidator<CountryAddResource>, CountryAddResourceValidator>();
+
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(factory =>
+            {
+                var actionContext = factory.GetService<IActionContextAccessor>()
+                    .ActionContext;
+                return new UrlHelper(actionContext);
+            });
 
             // services.AddMvc()
             //     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());

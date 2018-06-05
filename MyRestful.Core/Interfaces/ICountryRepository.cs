@@ -6,7 +6,7 @@ namespace MyRestful.Core.Interfaces
 {
     public interface ICountryRepository
     {
-        Task<IEnumerable<Country>> GetCountriesAsync();
+        Task<PaginatedList<Country>> GetCountriesAsync(CountryResourceParameters parameters);
         void AddCountry(Country country);
         Task<Country> GetCountryByIdAsync(int id, bool includeCities = false);
         Task<bool> CountryExistAsync(int countryId);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
+using Newtonsoft.Json;
 
 namespace MyRestful.Api.Controllers
 {
@@ -18,21 +18,24 @@ namespace MyRestful.Api.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
+        private readonly IUrlHelper _urlHelper;
 
         public CountryController(
             IUnitOfWork unitOfWork,
-            ICountryRepository countryRepository, IMapper mapper)
+            ICountryRepository countryRepository, IMapper mapper, IUrlHelper urlHelper)
         {
             _unitOfWork = unitOfWork;
             _countryRepository = countryRepository;
             _mapper = mapper;
+            _urlHelper = urlHelper;
         }
-
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        
+        [HttpGet(Name = "GetCountries")]
+        public async Task<IActionResult> Get(CountryResourceParameters countryResourceParameters)
         {
-            var countries = await _countryRepository.GetCountriesAsync();
-            var countryResources = _mapper.Map<List<CountryResource>>(countries);
+            var pagedList = await _countryRepository.GetCountriesAsync(countryResourceParameters);
+            var countryResources = _mapper.Map<List<CountryResource>>(pagedList);
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pagedList.PaginationBase));
             return Ok(countryResources);
         }
 
@@ -122,6 +125,24 @@ namespace MyRestful.Api.Controllers
                 throw new Exception($"Updating country {id} failed when saving.");
             }
             return NoContent();
+        }
+
+        private string CreateCountryUri(PaginationBase parameters, PaginationResourceUriType uriType)
+        {
+            switch (uriType)
+            {
+                case PaginationResourceUriType.PreviousPage:
+                    var previousParameters = parameters.Clone();
+                    previousParameters.PageIndex--;
+                    return _urlHelper.Link("GetCountries", previousParameters);
+                case PaginationResourceUriType.NextPage:
+                    var nextParameters = parameters.Clone();
+                    nextParameters.PageIndex++;
+                    return _urlHelper.Link("GetCountries", nextParameters);
+                case PaginationResourceUriType.CurrentPage:
+                default:
+                    return _urlHelper.Link("GetCountries", parameters);
+            }
         }
 
     }

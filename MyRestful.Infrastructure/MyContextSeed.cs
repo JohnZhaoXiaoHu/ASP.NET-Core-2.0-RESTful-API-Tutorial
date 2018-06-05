@@ -72,6 +72,69 @@ namespace MyRestful.Infrastructure
                                     new City{ Name = "Birmingham" },
                                     new City{ Name = "Glasgow" }
                                 }
+                            },
+                            new Country{
+                                EnglishName = "Denmark",
+                                ChineseName = "丹麦",
+                                Abbreviation = "丹麦",
+                                Cities = new List<City>
+                                {
+                                    new City{ Name = "Copenhagen " }
+                                }
+                            },
+                            new Country{
+                                EnglishName = "Norway",
+                                ChineseName = "挪威",
+                                Abbreviation = "挪威",
+                                Cities = new List<City>
+                                {
+                                    new City{ Name = "Oslo" }
+                                }
+                            },
+                            new Country{
+                                EnglishName = "Sweden",
+                                ChineseName = "瑞典",
+                                Abbreviation = "瑞典",
+                                Cities = new List<City>
+                                {
+                                    new City{ Name = "Stockholm" }
+                                }
+                            },
+                            new Country{
+                                EnglishName = "Germany",
+                                ChineseName = "德意志联邦共和国",
+                                Abbreviation = "德国",
+                                Cities = new List<City>
+                                {
+                                    new City{ Name = "Berlin" }
+                                }
+                            },
+                            new Country{
+                                EnglishName = "Poland",
+                                ChineseName = "波兰",
+                                Abbreviation = "波兰",
+                                Cities = new List<City>
+                                {
+                                    new City{ Name = "Warsaw" }
+                                }
+                            },
+                            new Country{
+                                EnglishName = "Switzerland",
+                                ChineseName = "瑞士",
+                                Abbreviation = "瑞士",
+                                Cities = new List<City>
+                                {
+                                    new City{ Name = "Bern" }
+                                }
+                            },
+                            new Country{
+                                EnglishName = "Austria",
+                                ChineseName = "奥地利",
+                                Abbreviation = "奥地利",
+                                Cities = new List<City>
+                                {
+                                    new City{ Name = "Vienna" }
+                                }
                             }
                         }
                     );

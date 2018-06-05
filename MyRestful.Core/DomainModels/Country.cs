@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using MyRestful.Core.Interfaces;
 
 namespace MyRestful.Core.DomainModels
 {
-    public class Country
+    public class Country : IEntity
     {
         public int Id { get; set; }
         public string EnglishName { get; set; }
