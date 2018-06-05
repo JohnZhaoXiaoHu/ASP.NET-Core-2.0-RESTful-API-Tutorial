@@ -35,7 +35,23 @@ namespace MyRestful.Api.Controllers
         {
             var pagedList = await _countryRepository.GetCountriesAsync(countryResourceParameters);
             var countryResources = _mapper.Map<List<CountryResource>>(pagedList);
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pagedList.PaginationBase));
+
+            var previousLink = pagedList.HasPrevious
+                ? CreateCountryUri(countryResourceParameters, PaginationResourceUriType.PreviousPage) : null;
+            var nextLink = pagedList.HasNext
+                ? CreateCountryUri(countryResourceParameters, PaginationResourceUriType.NextPage) : null;
+
+            var meta = new
+            {
+                pagedList.TotalItemsCount,
+                pagedList.PaginationBase.PageSize,
+                pagedList.PaginationBase.PageIndex,
+                pagedList.PageCount,
+                PreviousPageLink = previousLink,
+                NextPageLink = nextLink
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta));
             return Ok(countryResources);
         }
 

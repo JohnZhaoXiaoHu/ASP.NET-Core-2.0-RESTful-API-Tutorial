@@ -6,10 +6,28 @@ namespace MyRestful.Core.DomainModels
     {
         public PaginationBase PaginationBase { get; }
 
-        public PaginatedList(PaginationBase paginationBase, IEnumerable<T> data)
+        public int TotalItemsCount { get; set; }
+        public int PageCount => TotalItemsCount / PaginationBase.PageSize + (TotalItemsCount % PaginationBase.PageSize > 0 ? 1 : 0);
+
+        public bool HasPrevious => PaginationBase.PageIndex > 0;
+        public bool HasNext => PaginationBase.PageIndex < PageCount - 1;
+
+        public PaginatedList(int pageIndex, int pageSize, int totalItemsCount, IEnumerable<T> data)
         {
-            PaginationBase = paginationBase;
+            PaginationBase = new PaginationBase
+            {
+                PageIndex = pageIndex,
+                PageSize = pageSize
+            };
+            TotalItemsCount = totalItemsCount;
             AddRange(data);
         }
+
+        //public static PaginatedList<T> Create(IQueryable<T> source, int pageIndex, int pageSize)
+        //{
+        //    var count = source.Count();
+        //    var items = source.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+        //    return new PaginatedList<T>(pageIndex, pageSize, count, items);
+        //}
     }
 }

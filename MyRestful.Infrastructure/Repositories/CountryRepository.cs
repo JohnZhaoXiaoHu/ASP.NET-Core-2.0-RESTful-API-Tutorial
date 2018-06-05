@@ -19,18 +19,13 @@ namespace MyRestful.Infrastructure.Repositories
         public async Task<PaginatedList<Country>> GetCountriesAsync(CountryResourceParameters parameters)
         {
             var query = _myContext.Countries
-                .OrderBy(x => x.Id)
-                .Skip(parameters.PageSize * parameters.PageIndex)
-                .Take(parameters.PageSize);
+                .OrderBy(x => x.Id);
             var count = await query.CountAsync();
-            var items = await query.ToListAsync();
+            var items = await query
+                .Skip(parameters.PageSize * parameters.PageIndex)
+                .Take(parameters.PageSize).ToListAsync();
 
-            return new PaginatedList<Country>(new PaginationBase
-            {
-                Count = count,
-                PageIndex = parameters.PageIndex,
-                PageSize = parameters.PageSize
-            }, items);
+            return new PaginatedList<Country>(parameters.PageIndex, parameters.PageSize, count, items);
         }
 
         public async Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<int> ids)
