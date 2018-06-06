@@ -37,7 +37,7 @@ namespace MyRestful.Infrastructure
                                 }
                             },
                             new Country{
-                                EnglishName = "China",
+                                EnglishName = "USA",
                                 ChineseName = "美利坚合众国",
                                 Abbreviation = "美国",
                                 Cities = new List<City>
@@ -50,7 +50,7 @@ namespace MyRestful.Infrastructure
                                 }
                             },
                             new Country{
-                                EnglishName = "China",
+                                EnglishName = "Finland",
                                 ChineseName = "芬兰",
                                 Abbreviation = "芬兰",
                                 Cities = new List<City>
@@ -61,7 +61,7 @@ namespace MyRestful.Infrastructure
                                 }
                             },
                             new Country{
-                                EnglishName = "China",
+                                EnglishName = "UK",
                                 ChineseName = "大不列颠及北爱尔兰联合王国",
                                 Abbreviation = "英国",
                                 Cities = new List<City>
@@ -74,7 +74,7 @@ namespace MyRestful.Infrastructure
                                 }
                             },
                             new Country{
-                                EnglishName = "China",
+                                EnglishName = "Denmark",
                                 ChineseName = "丹麦",
                                 Abbreviation = "丹麦",
                                 Cities = new List<City>
@@ -83,7 +83,7 @@ namespace MyRestful.Infrastructure
                                 }
                             },
                             new Country{
-                                EnglishName = "China",
+                                EnglishName = "Norway",
                                 ChineseName = "挪威",
                                 Abbreviation = "挪威",
                                 Cities = new List<City>

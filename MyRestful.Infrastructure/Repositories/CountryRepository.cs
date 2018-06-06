@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
+using System.Linq.Dynamic.Core;
 
 namespace MyRestful.Infrastructure.Repositories
 {
@@ -31,7 +32,13 @@ namespace MyRestful.Infrastructure.Repositories
                 query = query.Where(x => x.ChineseName.ToLowerInvariant() == chineseNameClause);
             }
 
-            query = query.OrderBy(x => x.Id);
+            if (!string.IsNullOrEmpty(parameters.OrderBy))
+            {
+                var isDescending = parameters.OrderBy.EndsWith(" desc");
+                var property = isDescending ? parameters.OrderBy.Split(" ")[0] : parameters.OrderBy;
+                query = query.OrderBy(property + (isDescending ? " descending" : " ascending"));
+            }
+
             var count = await query.CountAsync();
             var items = await query
                 .Skip(parameters.PageSize * parameters.PageIndex)

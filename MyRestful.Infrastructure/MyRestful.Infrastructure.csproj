@@ -6,10 +6,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.0" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.10" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MyRestful.Core\MyRestful.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>
