@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
+using MyRestful.Infrastructure.Resources;
 
 namespace MyRestful.Api.Configurations
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MyRestful.Api.Resources
+namespace MyRestful.Infrastructure.Resources
 {
     public class CountryAddResource
     {

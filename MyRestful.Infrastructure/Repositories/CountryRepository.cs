@@ -4,17 +4,20 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
-using System.Linq.Dynamic.Core;
+using MyRestful.Infrastructure.Resources;
+using MyRestful.Infrastructure.Services;
 
 namespace MyRestful.Infrastructure.Repositories
 {
     public class CountryRepository : ICountryRepository
     {
         private readonly MyContext _myContext;
+        private readonly IPropertyMappingContainer _propertyMappingContainer;
 
-        public CountryRepository(MyContext myContext)
+        public CountryRepository(MyContext myContext, IPropertyMappingContainer propertyMappingContainer)
         {
             _myContext = myContext;
+            _propertyMappingContainer = propertyMappingContainer;
         }
 
         public async Task<PaginatedList<Country>> GetCountriesAsync(CountryResourceParameters parameters)
@@ -26,18 +29,14 @@ namespace MyRestful.Infrastructure.Repositories
                 var englishNameClause = parameters.EnglishName.Trim().ToLowerInvariant();
                 query = query.Where(x => x.EnglishName.ToLowerInvariant() == englishNameClause);
             }
+
             if (!string.IsNullOrEmpty(parameters.ChineseName))
             {
                 var chineseNameClause = parameters.ChineseName.Trim().ToLowerInvariant();
                 query = query.Where(x => x.ChineseName.ToLowerInvariant() == chineseNameClause);
             }
 
-            if (!string.IsNullOrEmpty(parameters.OrderBy))
-            {
-                var isDescending = parameters.OrderBy.EndsWith(" desc");
-                var property = isDescending ? parameters.OrderBy.Split(" ")[0] : parameters.OrderBy;
-                query = query.OrderBy(property + (isDescending ? " descending" : " ascending"));
-            }
+            query = query.ApplySort(parameters.OrderBy, _propertyMappingContainer.Resolve<CountryResource, Country>());
 
             var count = await query.CountAsync();
             var items = await query

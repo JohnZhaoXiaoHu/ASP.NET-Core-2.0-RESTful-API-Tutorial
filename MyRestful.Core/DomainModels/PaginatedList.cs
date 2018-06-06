@@ -22,12 +22,5 @@ namespace MyRestful.Core.DomainModels
             TotalItemsCount = totalItemsCount;
             AddRange(data);
         }
-
-        //public static PaginatedList<T> Create(IQueryable<T> source, int pageIndex, int pageSize)
-        //{
-        //    var count = source.Count();
-        //    var items = source.Skip(pageIndex * pageSize).Take(pageSize).ToList();
-        //    return new PaginatedList<T>(pageIndex, pageSize, count, items);
-        //}
     }
 }

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
+using MyRestful.Infrastructure.Resources;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 

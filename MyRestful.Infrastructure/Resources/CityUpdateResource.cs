@@ -1,4 +1,4 @@
-﻿namespace MyRestful.Api.Resources
+﻿namespace MyRestful.Infrastructure.Resources
 {
     public class CityUpdateResource : CityAddOrUpdateResource
     {

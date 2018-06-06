@@ -14,11 +14,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MyRestful.Api.Resources;
+using MyRestful.Api.Configurations;
 using MyRestful.Api.Validators;
 using MyRestful.Core.Interfaces;
 using MyRestful.Infrastructure;
 using MyRestful.Infrastructure.Repositories;
+using MyRestful.Infrastructure.Resources;
 using Serilog;
 using Serilog.Events;
 
@@ -71,6 +72,8 @@ namespace MyRestful.Api
                     .ActionContext;
                 return new UrlHelper(actionContext);
             });
+
+            services.AddPropertyMappings();
 
             // services.AddMvc()
             //     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());

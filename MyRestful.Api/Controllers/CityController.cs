@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyRestful.Api.Helpers;
-using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
+using MyRestful.Infrastructure.Resources;
 
 namespace MyRestful.Api.Controllers
 {

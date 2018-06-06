@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using MyRestful.Api.Resources;
+using MyRestful.Infrastructure.Resources;
 
 namespace MyRestful.Api.Validators
 {

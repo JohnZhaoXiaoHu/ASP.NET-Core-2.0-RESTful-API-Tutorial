@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using MyRestful.Api.Helpers;
-using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
+using MyRestful.Infrastructure.Resources;
 
 namespace MyRestful.Api.Controllers
 {
