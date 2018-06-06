@@ -8,6 +8,7 @@ using MyRestful.Api.Resources;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace MyRestful.Api.Controllers
 {
@@ -29,7 +30,7 @@ namespace MyRestful.Api.Controllers
             _mapper = mapper;
             _urlHelper = urlHelper;
         }
-        
+
         [HttpGet(Name = "GetCountries")]
         public async Task<IActionResult> Get(CountryResourceParameters countryResourceParameters)
         {
@@ -51,7 +52,10 @@ namespace MyRestful.Api.Controllers
                 NextPageLink = nextLink
             };
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta));
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            }));
             return Ok(countryResources);
         }
 
@@ -143,17 +147,29 @@ namespace MyRestful.Api.Controllers
             return NoContent();
         }
 
-        private string CreateCountryUri(PaginationBase parameters, PaginationResourceUriType uriType)
+        private string CreateCountryUri(CountryResourceParameters parameters, PaginationResourceUriType uriType)
         {
             switch (uriType)
             {
                 case PaginationResourceUriType.PreviousPage:
-                    var previousParameters = parameters.Clone();
-                    previousParameters.PageIndex--;
+                    var previousParameters = new
+                    {
+                        pageIndex = parameters.PageIndex - 1,
+                        pageSize = parameters.PageSize,
+                        orderBy = parameters.OrderBy,
+                        chineseName = parameters.ChineseName,
+                        englishName = parameters.EnglishName
+                    };
                     return _urlHelper.Link("GetCountries", previousParameters);
                 case PaginationResourceUriType.NextPage:
-                    var nextParameters = parameters.Clone();
-                    nextParameters.PageIndex++;
+                    var nextParameters = new
+                    {
+                        pageIndex = parameters.PageIndex + 1,
+                        pageSize = parameters.PageSize,
+                        orderBy = parameters.OrderBy,
+                        chineseName = parameters.ChineseName,
+                        englishName = parameters.EnglishName
+                    };
                     return _urlHelper.Link("GetCountries", nextParameters);
                 case PaginationResourceUriType.CurrentPage:
                 default:

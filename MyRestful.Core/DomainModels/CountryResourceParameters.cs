@@ -1,6 +1,10 @@
-﻿namespace MyRestful.Core.DomainModels
+﻿using System;
+
+namespace MyRestful.Core.DomainModels
 {
     public class CountryResourceParameters: PaginationBase
     {
+        public string EnglishName { get; set; }
+        public string ChineseName { get; set; }
     }
 }

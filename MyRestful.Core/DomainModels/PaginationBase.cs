@@ -13,17 +13,6 @@ namespace MyRestful.Core.DomainModels
         }
         public string OrderBy { get; set; } = nameof(IEntity.Id);
 
-        private int MaxPageSize { get; set; } = 100;
-
-        public PaginationBase Clone()
-        {
-            return new PaginationBase
-            {
-                PageIndex = PageIndex,
-                PageSize = PageSize,
-                OrderBy = OrderBy,
-                MaxPageSize = MaxPageSize
-            };
-        }
+        protected int MaxPageSize { get; set; } = 100;
     }
 }

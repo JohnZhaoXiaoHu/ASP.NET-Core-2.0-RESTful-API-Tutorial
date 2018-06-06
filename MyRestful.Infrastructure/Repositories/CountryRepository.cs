@@ -18,8 +18,20 @@ namespace MyRestful.Infrastructure.Repositories
 
         public async Task<PaginatedList<Country>> GetCountriesAsync(CountryResourceParameters parameters)
         {
-            var query = _myContext.Countries
-                .OrderBy(x => x.Id);
+            var query = _myContext.Countries.AsQueryable();
+
+            if (!string.IsNullOrEmpty(parameters.EnglishName))
+            {
+                var englishNameClause = parameters.EnglishName.Trim().ToLowerInvariant();
+                query = query.Where(x => x.EnglishName.ToLowerInvariant() == englishNameClause);
+            }
+            if (!string.IsNullOrEmpty(parameters.ChineseName))
+            {
+                var chineseNameClause = parameters.ChineseName.Trim().ToLowerInvariant();
+                query = query.Where(x => x.ChineseName.ToLowerInvariant() == chineseNameClause);
+            }
+
+            query = query.OrderBy(x => x.Id);
             var count = await query.CountAsync();
             var items = await query
                 .Skip(parameters.PageSize * parameters.PageIndex)
