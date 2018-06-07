@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MyRestful.Core.DomainModels
+﻿namespace MyRestful.Core.DomainModels
 {
     public class CountryResourceParameters: PaginationBase
     {

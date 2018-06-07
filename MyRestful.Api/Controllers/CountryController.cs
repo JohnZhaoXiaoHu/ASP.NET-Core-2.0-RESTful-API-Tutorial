@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
 using MyRestful.Infrastructure.Resources;
+using MyRestful.Infrastructure.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 namespace MyRestful.Api.Controllers
 {
-    // [Route("api/[controller]")]
     [Route("api/countries")]
     public class CountryController : Controller
     {
@@ -20,20 +20,39 @@ namespace MyRestful.Api.Controllers
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
         private readonly IUrlHelper _urlHelper;
+        private readonly IPropertyMappingContainer _propertyMappingContainer;
+        private readonly ITypeHelperService _typeHelperService;
+
 
         public CountryController(
             IUnitOfWork unitOfWork,
-            ICountryRepository countryRepository, IMapper mapper, IUrlHelper urlHelper)
+            ICountryRepository countryRepository,
+            IMapper mapper,
+            IUrlHelper urlHelper,
+            IPropertyMappingContainer propertyMappingContainer,
+            ITypeHelperService typeHelperService)
         {
             _unitOfWork = unitOfWork;
             _countryRepository = countryRepository;
             _mapper = mapper;
             _urlHelper = urlHelper;
+            _propertyMappingContainer = propertyMappingContainer;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet(Name = "GetCountries")]
         public async Task<IActionResult> Get(CountryResourceParameters countryResourceParameters)
         {
+            if (!_propertyMappingContainer.ValidMappingExistsFor<CountryResource, Country>(countryResourceParameters.OrderBy))
+            {
+                return BadRequest("Can't find the fields for sorting.");
+            }
+
+            if (!_typeHelperService.TypeHasProperties<CountryResource>(countryResourceParameters.Fields))
+            {
+                return BadRequest("Can't find the fields on Resource.");
+            }
+
             var pagedList = await _countryRepository.GetCountriesAsync(countryResourceParameters);
             var countryResources = _mapper.Map<List<CountryResource>>(pagedList);
 
@@ -56,19 +75,24 @@ namespace MyRestful.Api.Controllers
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
-            return Ok(countryResources);
+
+            return Ok(countryResources.ToDynamicIEnumerable(countryResourceParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetCountry")]
-        public async Task<IActionResult> GetCountry(int id, bool includeCities = false)
+        public async Task<IActionResult> GetCountry(int id, string fields = null, bool includeCities = false)
         {
+            if (!_typeHelperService.TypeHasProperties<CountryResource>(fields))
+            {
+                return BadRequest("Can't find the fields on Resource.");
+            }
             var country = await _countryRepository.GetCountryByIdAsync(id, includeCities);
             if (country == null)
             {
                 return NotFound();
             }
             var countryResource = _mapper.Map<CountryResource>(country);
-            return Ok(countryResource);
+            return Ok(countryResource.ToDynamic(fields));
         }
 
         [HttpPost]
@@ -157,6 +181,7 @@ namespace MyRestful.Api.Controllers
                         pageIndex = parameters.PageIndex - 1,
                         pageSize = parameters.PageSize,
                         orderBy = parameters.OrderBy,
+                        fields = parameters.Fields,
                         chineseName = parameters.ChineseName,
                         englishName = parameters.EnglishName
                     };
@@ -167,6 +192,7 @@ namespace MyRestful.Api.Controllers
                         pageIndex = parameters.PageIndex + 1,
                         pageSize = parameters.PageSize,
                         orderBy = parameters.OrderBy,
+                        fields = parameters.Fields,
                         chineseName = parameters.ChineseName,
                         englishName = parameters.EnglishName
                     };

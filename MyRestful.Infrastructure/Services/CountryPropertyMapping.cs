@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MyRestful.Core.DomainModels;
 using MyRestful.Infrastructure.Resources;
 
@@ -7,6 +8,7 @@ namespace MyRestful.Infrastructure.Services
     public class CountryPropertyMapping : PropertyMapping<CountryResource, Country>
     {
         public CountryPropertyMapping() : base(new Dictionary<string, List<MappedProperty>>
+            (StringComparer.OrdinalIgnoreCase)
         {
             [nameof(CountryResource.EnglishName)] = new List<MappedProperty>
             {

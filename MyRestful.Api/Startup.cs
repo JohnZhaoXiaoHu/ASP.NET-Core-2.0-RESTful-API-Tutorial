@@ -20,6 +20,8 @@ using MyRestful.Core.Interfaces;
 using MyRestful.Infrastructure;
 using MyRestful.Infrastructure.Repositories;
 using MyRestful.Infrastructure.Resources;
+using MyRestful.Infrastructure.Services;
+using Newtonsoft.Json.Serialization;
 using Serilog;
 using Serilog.Events;
 
@@ -59,7 +61,12 @@ namespace MyRestful.Api
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
-            }).AddFluentValidation();
+            })
+            .AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            })
+            .AddFluentValidation();
 
             services.AddTransient<IValidator<CityAddResource>, CityAddOrUpdateResourceValidator<CityAddResource>>();
             services.AddTransient<IValidator<CityUpdateResource>, CityUpdateResourceValidator>();
@@ -74,6 +81,7 @@ namespace MyRestful.Api
             });
 
             services.AddPropertyMappings();
+            services.AddTransient<ITypeHelperService, TypeHelperService>();
 
             // services.AddMvc()
             //     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
