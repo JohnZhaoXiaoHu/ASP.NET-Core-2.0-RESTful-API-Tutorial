@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using MyRestful.Infrastructure.Resources.Hateoas;
 
 namespace MyRestful.Infrastructure.Resources
 {
-    public class CountryResource
+    public class CountryResource: LinkResourceBase
     {
         public CountryResource()
         {

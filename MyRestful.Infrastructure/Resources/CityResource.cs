@@ -1,6 +1,8 @@
-﻿namespace MyRestful.Infrastructure.Resources
+﻿using MyRestful.Infrastructure.Resources.Hateoas;
+
+namespace MyRestful.Infrastructure.Resources
 {
-    public class CityResource
+    public class CityResource: LinkResourceBase
     {
         public int Id { get; set; }
         public int CountryId { get; set; }
