@@ -4,7 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 
-namespace MyRestful.Infrastructure.Services
+namespace MyRestful.Infrastructure.Helpers
 {
     public static class EnumerableExtensions
     {

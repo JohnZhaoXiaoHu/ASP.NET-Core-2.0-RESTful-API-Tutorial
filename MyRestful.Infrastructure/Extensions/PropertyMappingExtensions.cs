@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MyRestful.Infrastructure.Services;
 
-namespace MyRestful.Api.Configurations
+namespace MyRestful.Infrastructure.Extensions
 {
-    public static class PropertyMappingExtension
+    public static class PropertyMappingExtensions
     {
         public static void AddPropertyMappings(this IServiceCollection services)
         {

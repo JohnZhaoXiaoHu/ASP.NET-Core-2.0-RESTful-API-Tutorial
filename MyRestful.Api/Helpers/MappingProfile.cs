@@ -4,7 +4,7 @@ using AutoMapper;
 using MyRestful.Core.DomainModels;
 using MyRestful.Infrastructure.Resources;
 
-namespace MyRestful.Api.Configurations
+namespace MyRestful.Api.Helpers
 {
     public class MappingProfile : Profile
     {

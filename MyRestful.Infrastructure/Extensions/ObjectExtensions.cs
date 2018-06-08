@@ -1,11 +1,10 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
-namespace MyRestful.Infrastructure.Services
+namespace MyRestful.Infrastructure.Helpers
 {
     public static class ObjectExtensions
     {
@@ -34,7 +33,7 @@ namespace MyRestful.Infrastructure.Services
                 var propertyInfo = typeof(TSource).GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                 if (propertyInfo == null)
                 {
-                    throw new Exception($"Can't found property â€˜{typeof(TSource)}â€™ on â€˜{propertyName}â€™");
+                    throw new Exception($"Can't found property ¡®{typeof(TSource)}¡¯ on ¡®{propertyName}¡¯");
                 }
                 var propertyValue = propertyInfo.GetValue(source);
                 ((IDictionary<string, object>)dataShapedObject).Add(propertyInfo.Name, propertyValue);
