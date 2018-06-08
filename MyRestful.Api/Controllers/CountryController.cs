@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +9,7 @@ using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
 using MyRestful.Infrastructure.Helpers;
 using MyRestful.Infrastructure.Resources;
+using MyRestful.Infrastructure.Resources.Hateoas;
 using MyRestful.Infrastructure.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -42,7 +44,7 @@ namespace MyRestful.Api.Controllers
         }
 
         [HttpGet(Name = "GetCountries")]
-        public async Task<IActionResult> Get(CountryResourceParameters countryResourceParameters)
+        public async Task<IActionResult> GetCountries(CountryResourceParameters countryResourceParameters)
         {
             if (!_propertyMappingContainer.ValidMappingExistsFor<CountryResource, Country>(countryResourceParameters.OrderBy))
             {
@@ -57,19 +59,12 @@ namespace MyRestful.Api.Controllers
             var pagedList = await _countryRepository.GetCountriesAsync(countryResourceParameters);
             var countryResources = _mapper.Map<List<CountryResource>>(pagedList);
 
-            var previousLink = pagedList.HasPrevious
-                ? CreateCountryUri(countryResourceParameters, PaginationResourceUriType.PreviousPage) : null;
-            var nextLink = pagedList.HasNext
-                ? CreateCountryUri(countryResourceParameters, PaginationResourceUriType.NextPage) : null;
-
             var meta = new
             {
                 pagedList.TotalItemsCount,
                 pagedList.PaginationBase.PageSize,
                 pagedList.PaginationBase.PageIndex,
-                pagedList.PageCount,
-                PreviousPageLink = previousLink,
-                NextPageLink = nextLink
+                pagedList.PageCount
             };
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta, new JsonSerializerSettings
@@ -77,7 +72,22 @@ namespace MyRestful.Api.Controllers
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             }));
 
-            return Ok(countryResources.ToDynamicIEnumerable(countryResourceParameters.Fields));
+            var links = CreateLinksForCountries(countryResourceParameters, pagedList.HasPrevious, pagedList.HasNext);
+            var shapedResources = countryResources.ToDynamicIEnumerable(countryResourceParameters.Fields);
+            var shapedResourcesWithLinks = shapedResources.Select(country =>
+            {
+                var countryDict = country as IDictionary<string, object>;
+                var countryLinks = CreateLinksForCountry((int)countryDict["Id"], countryResourceParameters.Fields);
+                countryDict.Add("links", countryLinks);
+                return countryDict;
+            });
+            var linkedCountries = new
+            {
+                value = shapedResourcesWithLinks,
+                links
+            };
+
+            return Ok(linkedCountries);
         }
 
         [HttpGet("{id}", Name = "GetCountry")]
@@ -93,10 +103,15 @@ namespace MyRestful.Api.Controllers
                 return NotFound();
             }
             var countryResource = _mapper.Map<CountryResource>(country);
-            return Ok(countryResource.ToDynamic(fields));
+
+            var links = CreateLinksForCountry(id, fields);
+            var result = countryResource.ToDynamic(fields) as IDictionary<string, object>;
+            result.Add("links", links);
+
+            return Ok(result);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateCountry")]
         public async Task<IActionResult> CreateCountry([FromBody] CountryAddResource country)
         {
             if (country == null)
@@ -113,7 +128,11 @@ namespace MyRestful.Api.Controllers
 
             var countryResource = Mapper.Map<CountryResource>(countryModel);
 
-            return CreatedAtRoute("GetCountry", new { id = countryModel.Id }, countryResource);
+            var links = CreateLinksForCountry(countryModel.Id);
+            var linkedCountryResource = countryResource.ToDynamic() as IDictionary<string, object>;
+            linkedCountryResource.Add("links", links);
+
+            return CreatedAtRoute("GetCountry", new { id = linkedCountryResource["Id"] }, linkedCountryResource);
         }
 
         [HttpPost("{id}")]
@@ -128,7 +147,7 @@ namespace MyRestful.Api.Controllers
             return StatusCode(StatusCodes.Status409Conflict);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteCountry")]
         public async Task<IActionResult> DeleteCountry(int id)
         {
             var country = await _countryRepository.GetCountryByIdAsync(id);
@@ -147,8 +166,7 @@ namespace MyRestful.Api.Controllers
             return NoContent();
         }
 
-
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateCountry")]
         public async Task<IActionResult> UpdateCountry(int id, [FromBody] CountryUpdateResource countryUpdate)
         {
             if (countryUpdate == null)
@@ -200,9 +218,78 @@ namespace MyRestful.Api.Controllers
                     return _urlHelper.Link("GetCountries", nextParameters);
                 case PaginationResourceUriType.CurrentPage:
                 default:
-                    return _urlHelper.Link("GetCountries", parameters);
+                    var currentParameters = new
+                    {
+                        pageIndex = parameters.PageIndex + 1,
+                        pageSize = parameters.PageSize,
+                        orderBy = parameters.OrderBy,
+                        fields = parameters.Fields,
+                        chineseName = parameters.ChineseName,
+                        englishName = parameters.EnglishName
+                    };
+                    return _urlHelper.Link("GetCountries", currentParameters);
             }
         }
 
+        private IEnumerable<LinkResource> CreateLinksForCountry(int id, string fields = null)
+        {
+            var links = new List<LinkResource>();
+
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                links.Add(
+                    new LinkResource(
+                        _urlHelper.Link("GetCountry", new { id = id }), "self", "GET"));
+            }
+            else
+            {
+                links.Add(
+                    new LinkResource(
+                        _urlHelper.Link("GetCountry", new { id = id, fields = fields }), "self", "GET"));
+            }
+
+            links.Add(
+                new LinkResource(
+                    _urlHelper.Link("DeleteCountry", new { id = id }), "delete_country", "DELETE"));
+
+            links.Add(
+                new LinkResource(
+                    _urlHelper.Link("CreateCityForCountry", new { countryId = id }), "create_city_for_country", "POST"));
+
+            links.Add(
+                new LinkResource(
+                    _urlHelper.Link("GetCitiesForCountry", new { countryId = id }), "get_cities_for_country", "GET"));
+
+            return links;
+        }
+
+        private IEnumerable<LinkResource> CreateLinksForCountries(CountryResourceParameters countryResourceParameters,
+            bool hasPrevious, bool hasNext)
+        {
+            var links = new List<LinkResource>
+            {
+                new LinkResource(
+                    CreateCountryUri(countryResourceParameters, PaginationResourceUriType.CurrentPage),
+                    "self", "GET")
+            };
+
+            if (hasPrevious)
+            {
+                links.Add(
+                    new LinkResource(
+                        CreateCountryUri(countryResourceParameters, PaginationResourceUriType.PreviousPage),
+                        "previous_page", "GET"));
+            }
+
+            if (hasNext)
+            {
+                links.Add(
+                    new LinkResource(
+                        CreateCountryUri(countryResourceParameters, PaginationResourceUriType.NextPage),
+                        "next_page", "GET"));
+            }
+
+            return links;
+        }
     }
 }
