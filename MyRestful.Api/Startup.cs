@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using AutoMapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -61,6 +62,9 @@ namespace MyRestful.Api
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+
+                var jsonOutputFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
+                jsonOutputFormatter?.SupportedMediaTypes.Add("application/vnd.mycompany.hateoas+json");
             })
             .AddJsonOptions(options =>
             {

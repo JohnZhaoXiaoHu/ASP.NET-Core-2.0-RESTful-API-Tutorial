@@ -44,7 +44,8 @@ namespace MyRestful.Api.Controllers
         }
 
         [HttpGet(Name = "GetCountries")]
-        public async Task<IActionResult> GetCountries(CountryResourceParameters countryResourceParameters)
+        public async Task<IActionResult> GetCountries(CountryResourceParameters countryResourceParameters, 
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingContainer.ValidMappingExistsFor<CountryResource, Country>(countryResourceParameters.OrderBy))
             {
@@ -59,35 +60,65 @@ namespace MyRestful.Api.Controllers
             var pagedList = await _countryRepository.GetCountriesAsync(countryResourceParameters);
             var countryResources = _mapper.Map<List<CountryResource>>(pagedList);
 
-            var meta = new
+            if (mediaType == "application/vnd.mycompany.hateoas+json")
             {
-                pagedList.TotalItemsCount,
-                pagedList.PaginationBase.PageSize,
-                pagedList.PaginationBase.PageIndex,
-                pagedList.PageCount
-            };
+                var meta = new
+                {
+                    pagedList.TotalItemsCount,
+                    pagedList.PaginationBase.PageSize,
+                    pagedList.PaginationBase.PageIndex,
+                    pagedList.PageCount
+                };
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta, new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            }));
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }));
 
-            var links = CreateLinksForCountries(countryResourceParameters, pagedList.HasPrevious, pagedList.HasNext);
-            var shapedResources = countryResources.ToDynamicIEnumerable(countryResourceParameters.Fields);
-            var shapedResourcesWithLinks = shapedResources.Select(country =>
-            {
-                var countryDict = country as IDictionary<string, object>;
-                var countryLinks = CreateLinksForCountry((int)countryDict["Id"], countryResourceParameters.Fields);
-                countryDict.Add("links", countryLinks);
-                return countryDict;
-            });
-            var linkedCountries = new
-            {
-                value = shapedResourcesWithLinks,
-                links
-            };
+                var links = CreateLinksForCountries(countryResourceParameters, pagedList.HasPrevious, pagedList.HasNext);
+                var shapedResources = countryResources.ToDynamicIEnumerable(countryResourceParameters.Fields);
+                var shapedResourcesWithLinks = shapedResources.Select(country =>
+                {
+                    var countryDict = country as IDictionary<string, object>;
+                    var countryLinks = CreateLinksForCountry((int)countryDict["Id"], countryResourceParameters.Fields);
+                    countryDict.Add("links", countryLinks);
+                    return countryDict;
+                });
+                var linkedCountries = new
+                {
+                    value = shapedResourcesWithLinks,
+                    links
+                };
 
-            return Ok(linkedCountries);
+                return Ok(linkedCountries);
+            }
+            else
+            {
+                var previousPageLink = pagedList.HasPrevious ?
+                    CreateCountryUri(countryResourceParameters,
+                        PaginationResourceUriType.PreviousPage) : null;
+
+                var nextPageLink = pagedList.HasNext ?
+                    CreateCountryUri(countryResourceParameters,
+                        PaginationResourceUriType.NextPage) : null;
+
+                var meta = new
+                {
+                    pagedList.TotalItemsCount,
+                    pagedList.PaginationBase.PageSize,
+                    pagedList.PaginationBase.PageIndex,
+                    pagedList.PageCount,
+                    previousPageLink,
+                    nextPageLink
+                };
+
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(meta, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }));
+
+                return Ok(countryResources.ToDynamicIEnumerable(countryResourceParameters.Fields));
+            }
         }
 
         [HttpGet("{id}", Name = "GetCountry")]
