@@ -39,6 +39,7 @@ namespace MyRestful.Api.Helpers
                         Mapper.Map(cityResource, city);
                     }
                 });
+            CreateMap<CountryAddWithContinentResource, Country>();
 
             CreateMap<City, CityResource>();
             CreateMap<CityResource, City>();

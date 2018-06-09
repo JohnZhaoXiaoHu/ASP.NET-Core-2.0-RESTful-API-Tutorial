@@ -63,6 +63,10 @@ namespace MyRestful.Api
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
 
+                var jsonInputFormatter = options.OutputFormatters.OfType<JsonInputFormatter>().FirstOrDefault();
+                jsonInputFormatter?.SupportedMediaTypes.Add("application/vnd.mycompany.country.create+json");
+                jsonInputFormatter?.SupportedMediaTypes.Add("application/vnd.mycompany.countrywithcontinent.create+json");
+
                 var jsonOutputFormatter = options.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
                 jsonOutputFormatter?.SupportedMediaTypes.Add("application/vnd.mycompany.hateoas+json");
             })

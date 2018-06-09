@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyRestful.Api.Helpers;
 using MyRestful.Core.DomainModels;
 using MyRestful.Core.Interfaces;
 using MyRestful.Infrastructure.Helpers;
@@ -44,7 +46,7 @@ namespace MyRestful.Api.Controllers
         }
 
         [HttpGet(Name = "GetCountries")]
-        public async Task<IActionResult> GetCountries(CountryResourceParameters countryResourceParameters, 
+        public async Task<IActionResult> GetCountries(CountryResourceParameters countryResourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingContainer.ValidMappingExistsFor<CountryResource, Country>(countryResourceParameters.OrderBy))
@@ -143,7 +145,36 @@ namespace MyRestful.Api.Controllers
         }
 
         [HttpPost(Name = "CreateCountry")]
+        [RequestHeaderMatchingMediaType("Content-Type",
+            new[] { "application/vnd.mycompany.country.create+json" })]
         public async Task<IActionResult> CreateCountry([FromBody] CountryAddResource country)
+        {
+            if (country == null)
+            {
+                return BadRequest();
+            }
+
+            var countryModel = _mapper.Map<Country>(country);
+            _countryRepository.AddCountry(countryModel);
+            if (!await _unitOfWork.SaveAsync())
+            {
+                throw new Exception("Error occurred when adding");
+            }
+
+            var countryResource = Mapper.Map<CountryResource>(countryModel);
+
+            var links = CreateLinksForCountry(countryModel.Id);
+            var linkedCountryResource = countryResource.ToDynamic() as IDictionary<string, object>;
+            linkedCountryResource.Add("links", links);
+
+            return CreatedAtRoute("GetCountry", new { id = linkedCountryResource["Id"] }, linkedCountryResource);
+        }
+
+        [HttpPost(Name = "CreateCountryWithContinent")]
+        [RequestHeaderMatchingMediaType("Content-Type", new[] { "application/vnd.mycompany.countrywithcontinent.create+json" })]
+        [RequestHeaderMatchingMediaType("Accept", new[] { "application/vnd.mycompany.countrywithcontinent.display+json" })]
+        public async Task<IActionResult> CreateCountryWithContinent(
+            [FromBody] CountryAddWithContinentResource country)
         {
             if (country == null)
             {
