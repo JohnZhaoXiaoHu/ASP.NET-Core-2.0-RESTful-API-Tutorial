@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyRestful.Api.Helpers;
@@ -19,6 +20,7 @@ using Newtonsoft.Json.Serialization;
 namespace MyRestful.Api.Controllers
 {
     [Authorize]
+    [EnableCors("AllowSpecificOrigin")]
     [Route("api/countries")]
     public class CountryController : Controller
     {
@@ -45,6 +47,7 @@ namespace MyRestful.Api.Controllers
             _typeHelperService = typeHelperService;
         }
 
+        [EnableCors("AllowSpecificOrigin")]
         [HttpGet(Name = "GetCountries")]
         public async Task<IActionResult> GetCountries(CountryResourceParameters countryResourceParameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -123,6 +126,8 @@ namespace MyRestful.Api.Controllers
             }
         }
 
+
+        [DisableCors]
         [HttpGet("{id}", Name = "GetCountry")]
         public async Task<IActionResult> GetCountry(int id, string fields = null, bool includeCities = false)
         {
