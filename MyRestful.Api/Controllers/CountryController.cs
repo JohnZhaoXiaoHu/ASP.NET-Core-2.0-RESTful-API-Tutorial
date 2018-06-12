@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -27,8 +26,7 @@ namespace MyRestful.Api.Controllers
         private readonly IUrlHelper _urlHelper;
         private readonly IPropertyMappingContainer _propertyMappingContainer;
         private readonly ITypeHelperService _typeHelperService;
-
-
+        
         public CountryController(
             IUnitOfWork unitOfWork,
             ICountryRepository countryRepository,
@@ -278,8 +276,8 @@ namespace MyRestful.Api.Controllers
                         englishName = parameters.EnglishName
                     };
                     return _urlHelper.Link("GetCountries", nextParameters);
-                case PaginationResourceUriType.CurrentPage:
                 default:
+                case PaginationResourceUriType.CurrentPage:
                     var currentParameters = new
                     {
                         pageIndex = parameters.PageIndex + 1,
@@ -301,18 +299,18 @@ namespace MyRestful.Api.Controllers
             {
                 links.Add(
                     new LinkResource(
-                        _urlHelper.Link("GetCountry", new { id = id }), "self", "GET"));
+                        _urlHelper.Link("GetCountry", new { id }), "self", "GET"));
             }
             else
             {
                 links.Add(
                     new LinkResource(
-                        _urlHelper.Link("GetCountry", new { id = id, fields = fields }), "self", "GET"));
+                        _urlHelper.Link("GetCountry", new { id, fields }), "self", "GET"));
             }
 
             links.Add(
                 new LinkResource(
-                    _urlHelper.Link("DeleteCountry", new { id = id }), "delete_country", "DELETE"));
+                    _urlHelper.Link("DeleteCountry", new { id }), "delete_country", "DELETE"));
 
             links.Add(
                 new LinkResource(

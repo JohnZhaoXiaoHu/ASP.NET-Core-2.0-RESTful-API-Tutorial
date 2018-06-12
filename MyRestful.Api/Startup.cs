@@ -91,6 +91,19 @@ namespace MyRestful.Api
             services.AddPropertyMappings();
             services.AddTransient<ITypeHelperService, TypeHelperService>();
 
+            services.AddHttpCacheHeaders(
+                expirationModelOptions =>
+                {
+                    expirationModelOptions.MaxAge = 600;
+
+                },
+                validationModelOptions =>
+                {
+                    validationModelOptions.AddMustRevalidate = true;
+                });
+
+            services.AddResponseCaching();
+
             // services.AddMvc()
             //     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
         }
@@ -116,6 +129,10 @@ namespace MyRestful.Api
 
             app.UseHsts();
             app.UseHttpsRedirection();
+
+            app.UseResponseCaching();
+
+            app.UseHttpCacheHeaders(); 
 
             app.UseMvc();
         }
