@@ -1,8 +1,10 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Text;
 using AutoMapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using MyRestful.Api.Validators;
 using MyRestful.Core.Interfaces;
 using MyRestful.Infrastructure;
@@ -106,6 +109,20 @@ namespace MyRestful.Api
 
             // services.AddMvc()
             //     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        var serverSecret = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(Configuration["JWT:ServerSecret"]));
+
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = serverSecret,
+                            ValidIssuer = Configuration["JWT:Issuer"],
+                            ValidAudience = Configuration["JWT:Audience"]
+                        };
+                    });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -130,9 +147,10 @@ namespace MyRestful.Api
             app.UseHsts();
             app.UseHttpsRedirection();
 
-            app.UseResponseCaching();
+            app.UseAuthentication();
 
-            app.UseHttpCacheHeaders(); 
+            app.UseResponseCaching();
+            app.UseHttpCacheHeaders();
 
             app.UseMvc();
         }

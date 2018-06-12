@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyRestful.Api.Helpers;
@@ -17,6 +18,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace MyRestful.Api.Controllers
 {
+    [Authorize]
     [Route("api/countries")]
     public class CountryController : Controller
     {
