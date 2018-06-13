@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using AspNetCoreRateLimit;
 using AutoMapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -135,11 +137,11 @@ namespace MyRestful.Api
                 options.ExcludedHosts.Add("www.example.com");
             });
 
-            services.AddHttpsRedirection(options =>
-            {
-                options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
-                options.HttpsPort = 5001;
-            });
+            //services.AddHttpsRedirection(options =>
+            //{
+            //    options.RedirectStatusCode = StatusCodes.Status301MovedPermanently;
+            //    options.HttpsPort = 5001;
+            //});
 
             services.AddCors();
 
@@ -153,16 +155,34 @@ namespace MyRestful.Api
             {
                 options.Filters.Add(new CorsAuthorizationFilterFactory("AllowSpecificOrigin"));
             });
+
+            services.AddMemoryCache();
+
+            services.Configure<IpRateLimitOptions>(options =>
+            {
+                options.GeneralRules = new List<RateLimitRule>
+                {
+                    new RateLimitRule
+                    {
+                        Endpoint = "*",
+                        Limit = 10,
+                        Period = "5m"
+                    },
+                    new RateLimitRule
+                    {
+                        Endpoint = "*",
+                        Limit = 2,
+                        Period = "10s"
+                    }
+                };
+            });
+
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseCors(builder => builder
-                .WithOrigins("http://example.com")
-                .AllowAnyHeader());
-
-            app.UseCors("AllowSpecificOrigin");
-
             app.UseStatusCodePages();
 
             app.UseExceptionHandler(builder =>
@@ -180,9 +200,17 @@ namespace MyRestful.Api
                 });
             });
 
+            app.UseIpRateLimiting();
+
+            app.UseCors(builder => builder
+                .WithOrigins("http://example.com")
+                .AllowAnyHeader());
+
+            app.UseCors("AllowSpecificOrigin");
+
             app.UseHsts();
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseAuthentication();
 

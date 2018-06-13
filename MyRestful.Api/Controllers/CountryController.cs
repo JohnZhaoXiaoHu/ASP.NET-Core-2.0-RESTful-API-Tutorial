@@ -19,7 +19,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace MyRestful.Api.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [EnableCors("AllowSpecificOrigin")]
     [Route("api/countries")]
     public class CountryController : Controller
